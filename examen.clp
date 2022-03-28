@@ -6,51 +6,51 @@
 
 
 (defrule comprobarStock
-
+    (declare (salience 70))
     (problema pedidos $?iniPedido pedido ?tipoPale ?cuantosPedido $?finPedido  lineaPedido $?lineaPedido robot cajasActuales ?cajasActuales pales $?ini pale ?tipoPale ?stockPale $?fin)
     (test (> ?cuantosPedido ?stockPale))
     =>
-    (printout t "No hay suficiente stock de " ?tipoPale crlf)
     (halt)
 
 )
 
 (defrule comprobarPedido
-
+    (declare (salience 60))
     (problema pedidos $?iniPedido pedido ?tipoPale ?cuantosPedido $?finPedido  $?resto)
     (test (= ?cuantosPedido 0))
     =>
-    (problema pedidos $?iniPedido ?cuantosPedido $?finPedido  $?resto)
+    (assert(problema pedidos $?iniPedido $?finPedido  $?resto))
 
 )
 
 (defrule comprobarFinal
     (declare (salience 100))
-    (problema pedidos $?pedido $?resto)
+    (problema pedidos $?pedido lineaPedido $?resto)
     (test (= (length$ $?pedido) 0))
     =>
     (printout t "FIN===========" crlf)
+    (halt)
 
 )
 
 
 
 (defrule cogerCaja
+    (declare (salience 50))
     (maxCajas ?numCajas)
-    (problema pedidos $?iniPedido pedido ?tipoPale ?cuantosPedido $?finPedido lineaPedido $?lineaPedido robot cajasActuales ?cajasActuales pales $?ini pale ?tipoPale ?stockPale $?fin)
-
-    (test (< ?cajasActuales ?numCajas)) ; no puede llevar mas del tope
+    (problema pedidos $?iniPedido pedido ?tipoPale ?cuantosPedido $?finPedido lineaPedido $?lineaPedido robot cajasActuales ?cajasActuales $?cajas pales $?ini pale ?tipoPale ?stockPale $?fin)
+    (test (< ?cajasActuales ?numCajas )) ; no puede llevar mas del tope
     (test (> ?cuantosPedido 0)) ; que el pedido aun le queden
     =>
-    (assert (problema pedidos $?iniPedido pedido ?tipoPale ?cuantosPedido $?finPedido lineaPedido $?lineaPedido robot cajasActuales (+ ?cajasActuales 1) caja ?tipoPale pales $?ini pale ?tipoPale (- ?stockPale 1) $?fin))
-    (printout t "Pillo caja de " ?tipoPale crlf)
+    (assert (problema pedidos $?iniPedido pedido ?tipoPale ?cuantosPedido $?finPedido lineaPedido $?lineaPedido robot cajasActuales (+ ?cajasActuales 1) caja ?tipoPale $?cajas pales $?ini pale ?tipoPale (- ?stockPale 1) $?fin))
 )
 
 (defrule dejarCaja
-    (problema pedidos $?iniPedido pedido ?tipoPale ?cuantosPedido $?finPedido lineaPedido $?lineaPedido robot cajasActuales ?cajasActuales caja $?cajas pales $?pales)
+    (declare (salience 40))
+    (problema pedidos $?iniPedido pedido ?tipoPale ?cuantosPedido $?finPedido lineaPedido $?lineaPedido robot cajasActuales ?cajasActuales $?iniCaja caja $?cajas $?finCaja pales $?pales)
 
-    (test (> ?cajasActuales 0)) ; no puede llevar mas del tope
+    (test (> ?cajasActuales 0))
     =>
-    (assert (problema pedidos $?iniPedido pedido ?tipoPale (- ?cuantosPedido 1) $?finPedido  lineaPedido $?lineaPedido $?cajas robot cajasActuales (- ?cajasActuales (length$ $?cajas)) caja pales $?pales))
-    (printout t "Dejo cajas de " $?cajas crlf)
+    (assert (problema pedidos $?iniPedido pedido ?tipoPale (- ?cuantosPedido 1) $?finPedido  lineaPedido $?lineaPedido $?cajas robot cajasActuales (- ?cajasActuales 1) $?iniCaja $?finCaja pales $?pales))
+
 )
